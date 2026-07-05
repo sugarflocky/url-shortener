@@ -8,9 +8,12 @@ import (
 )
 
 var (
+	// ErrCodeGenerationFailed is returned by service if it cannot generate code after maxAttempts attempts.
 	ErrCodeGenerationFailed = errors.New("code generation failed")
-	ErrEmptyURL             = errors.New("url is empty")
-	ErrEmptyCode            = errors.New("code is empty")
+	// ErrEmptyURL is returned by service if given URL is empty.
+	ErrEmptyURL = errors.New("url is empty")
+	// ErrEmptyCode is returned by service if given code is empty.
+	ErrEmptyCode = errors.New("code is empty")
 )
 
 const maxAttempts = 5 // max attempts to avoid infinity loop (basically needs only 1 attempt)
@@ -19,12 +22,16 @@ type Service struct {
 	storage Storage
 }
 
+// New creates a service with given storage.
 func New(storage Storage) *Service {
 	return &Service{
 		storage: storage,
 	}
 }
 
+// Shorten generates code for URL, returns the same code for the same URL.
+// Returns ErrEmptyURL if URL is empty.
+// Returns ErrCodeGenerationFailed if code cannot be created after maxAttempts attempts.
 func (s *Service) Shorten(ctx context.Context, url string) (code string, err error) {
 	if url == "" {
 		return "", ErrEmptyURL
@@ -52,11 +59,12 @@ func (s *Service) Shorten(ctx context.Context, url string) (code string, err err
 			return "", err
 		}
 		return code, nil
-
 	}
 	return "", ErrCodeGenerationFailed
 }
 
+// Resolve returns URL for given code.
+// Returns ErrEmptyCode if code is empty.
 func (s *Service) Resolve(ctx context.Context, code string) (url string, err error) {
 	if code == "" {
 		return "", ErrEmptyCode
