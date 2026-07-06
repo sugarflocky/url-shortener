@@ -28,6 +28,9 @@ func (h *Handler) Router() http.Handler {
 	return mux
 }
 
+// maxBodySize caps the request body size.
+const maxBodySize = 1 << 20
+
 type inputURLDto struct {
 	URL string `json:"url"`
 }
@@ -37,6 +40,8 @@ type codeResponse struct {
 }
 
 func (h *Handler) shorten(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxBodySize)
+
 	var req inputURLDto
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
