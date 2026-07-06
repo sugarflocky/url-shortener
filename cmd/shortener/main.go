@@ -14,6 +14,7 @@ import (
 	"github.com/sugarflocky/url-shortener/internal/httpapi"
 	"github.com/sugarflocky/url-shortener/internal/shortener"
 	"github.com/sugarflocky/url-shortener/internal/storage/memory"
+	"github.com/sugarflocky/url-shortener/internal/storage/postgres"
 )
 
 // shutdownTimeout limits waiting active request while stopping.
@@ -25,19 +26,24 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	var st shortener.Storage
+
 	switch cfg.Storage {
 	case config.StorageMemory:
 		st = memory.New()
 	case config.StoragePostgres:
-		// st = postgres.New()
-		log.Fatal("postgres storage is not implemented yet")
+		pg, err := postgres.New(ctx, cfg.DSN)
+		if err != nil {
+			log.Fatal(err)
+		}
+		st = pg
+
 	}
 	svc := shortener.New(st)
 	h := httpapi.New(svc)
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
 
 	srv := &http.Server{Addr: cfg.Addr, Handler: h.Router()}
 

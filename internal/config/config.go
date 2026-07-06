@@ -21,12 +21,16 @@ const (
 // Load reads and validates flags for main application.
 func Load() (*Config, error) {
 	storage := flag.String("storage", StorageMemory, "storage type: memory|postgres")
-	addr := flag.String("addr", ":8080", "Addres")
-	dsn := flag.String("dsn", "", "dsn")
+	addr := flag.String("addr", ":8080", "Address")
+	dsn := flag.String("dsn", "", "Database connection string")
 	flag.Parse()
 
 	if *storage != StorageMemory && *storage != StoragePostgres {
 		return nil, fmt.Errorf("unknown storage %q", *storage)
+	}
+
+	if *storage == StoragePostgres && *dsn == "" {
+		return nil, fmt.Errorf("DSN is required for postgres storage")
 	}
 	return &Config{Storage: *storage, Addr: *addr, DSN: *dsn}, nil
 }
