@@ -87,8 +87,8 @@ func TestURLAndCode(t *testing.T) {
 	rec = httptest.NewRecorder()
 
 	api.ServeHTTP(rec, req)
-	if rec.Code != http.StatusMovedPermanently {
-		t.Fatalf("status %d, want %d", rec.Code, http.StatusMovedPermanently)
+	if rec.Code != http.StatusTemporaryRedirect {
+		t.Fatalf("status %d, want %d", rec.Code, http.StatusTemporaryRedirect)
 	}
 	if loc := rec.Header().Get("Location"); loc != "https://testing.com/" {
 		t.Errorf("Location got %q, want %q", loc, "https://testing.com/")

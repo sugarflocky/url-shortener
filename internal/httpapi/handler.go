@@ -75,7 +75,7 @@ func (h *Handler) resolve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, gotURL, http.StatusMovedPermanently)
+	http.Redirect(w, r, gotURL, http.StatusTemporaryRedirect)
 }
 
 // statusFromError translates service errors into HTTP status codes.
